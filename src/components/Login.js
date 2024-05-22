@@ -57,7 +57,7 @@ const Login = () => {
       <Toaster />
       <Paper elevation={3} style={{ padding: 20, maxWidth: 400, margin: 'auto', marginTop: 50 }}>
         <Typography variant="h5" component="div" align="center" gutterBottom>
-          Partner
+          MusiceX
         </Typography>
         <TextField
           label="Email"

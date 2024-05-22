@@ -251,37 +251,47 @@ const handleAbleButtonClick = async () => {
                   <Paper
                     elevation={3}
                     className={`paper ${selectedItems.includes(item.id) ? 'selected' : ''}`}
-                    onClick={() => handleCheckboxChange(item.id)}
+                    onClick={() =>{
+                      if(picked){
+                        return false
+                      }
+                      else{
+                        handleCheckboxChange(item.id)
+                      }
+                    }}
                   >
-                    {item.name}
+                    <span style={{fontSize:"larg"}}>
+                      {item.name}
+                      </span> 
                   </Paper>
                 ) : (
                   <>
-                  {picked ? (
-                  <span style={{}}>
-                    <Paper
-                    elevation={3}
-                    className='paperX'
-                    style={{backgroundColor: item.Picker == pickerEmail ? "#1db954":'transparent',position:"relative"}}
-                  >
-                    <span className=''> 
-                                        {item.name}
-
-                     </span>
-                     <br />
-                    {item.Status !== 'Available' && (
-                  <span style={{}} className="unavailable-text" >Song taken by {item.Picker}</span>
-                )}
-                  </Paper>
-
-                  </span>
-                  ):(                  <Paper
+                 {item.Picker == pickerEmail ? ( <Paper
                     elevation={3}
                     className={`paper unavailable ${selectedItems.includes(item.id) ? 'selected' : ''}`}
+                    style={{backgroundColor:"#1db954"}}
                   >
-                    {item.name}
-                  </Paper>
-)}
+                    <span style={{fontSize:"larg"}}>
+{item.name}
+
+                    </span>
+                     {item.Status !== 'Available' && (
+                  <p style={{color:"red"}}>You picked {item.Picker}</p>
+                )}
+                  </Paper>):(
+                     <Paper
+                     elevation={3}
+                     className={`paper unavailable ${selectedItems.includes(item.id) ? 'selected' : ''}`}
+                   >
+                     <span style={{fontSize:"larg"}}>
+{item.name}
+
+                     </span>
+                      {item.Status !== 'Available' && (
+                   <p style={{color:"red"}}>Song taken by {item.Picker}</p>
+                 )}
+                   </Paper>
+                  )}
                   </>
                 )}
                 {/* {item.Status !== 'Available' && (
@@ -301,7 +311,7 @@ const handleAbleButtonClick = async () => {
                    <center>
         <h1 className="fixed-text" >
           <center>
-          You already picked three musics
+          You already picked three songs
 
           </center>
             </h1>

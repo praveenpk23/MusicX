@@ -103,10 +103,11 @@
     font-size: large;
     justify-content: center;
     width: 100%;
+    padding: 10px;
   }
   
    .container {
-    margin-top: 70px;
+    margin-top: 100px;
     background-color: azure;
   }
   
@@ -134,11 +135,7 @@
     flex: 1;
   }
   
-  .unavailable-text {
-    color: red;
-    /* position:absolute;
-    right:0; */
-  }
+
 
   
 
@@ -146,11 +143,5 @@
 
     .fixed-text{
        top: 40px;
-    }
-    .unavailable-text{
-        position: static;
-    }
-    .ua-1{
-        display: block;
     }
   }

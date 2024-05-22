@@ -28,7 +28,7 @@ const Navbar = ({email}) => {
       <AppBar position="fixed" >
         <Toolbar>
           <Typography  variant="h6" style={{ flexGrow: 1 }}>
-            <Link to='/' style={{color:"white",textDecoration:"none",marginRight:"20px"}}>            MusicX
+            <Link to='/' style={{color:"white",textDecoration:"none",marginRight:"20px"}}>            MusiceX
 </Link>
 {/* {email} */}
           </Typography>
