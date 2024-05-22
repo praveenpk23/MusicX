@@ -260,8 +260,10 @@ const handleAbleButtonClick = async () => {
                       }
                     }}
                   >
-                    <span style={{fontSize:"larg"}}>
-                      {item.name}
+                    <span style={{fontSize:"larger"}}>
+                      <bold>
+                        {item.name}
+                      </bold>
                       </span> 
                   </Paper>
                 ) : (
@@ -271,8 +273,10 @@ const handleAbleButtonClick = async () => {
                     className={`paper unavailable ${selectedItems.includes(item.id) ? 'selected' : ''}`}
                     style={{backgroundColor:"#1db954"}}
                   >
-                    <span style={{fontSize:"larg"}}>
-{item.name}
+                    <span style={{fontSize:"larger"}}>
+<bold>
+  {item.name}
+</bold>
 
                     </span>
                      {item.Status !== 'Available' && (
@@ -283,8 +287,10 @@ const handleAbleButtonClick = async () => {
                      elevation={3}
                      className={`paper unavailable ${selectedItems.includes(item.id) ? 'selected' : ''}`}
                    >
-                     <span style={{fontSize:"larg"}}>
-{item.name}
+                     <span style={{fontSize:"larger"}}>
+<bold>
+  {item.name}
+</bold>
 
                      </span>
                       {item.Status !== 'Available' && (
