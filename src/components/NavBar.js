@@ -30,7 +30,7 @@ const Navbar = ({email}) => {
           <Typography  variant="h6" style={{ flexGrow: 1 }}>
             <Link to='/' style={{color:"white",textDecoration:"none",marginRight:"20px"}}>            MusicX
 </Link>
-{email}
+{/* {email} */}
           </Typography>
           <Button color="inherit" onClick={handleLogout}>Logout</Button>
           <Button color="inherit" onClick={NavigateAdmin}>Admin</Button>

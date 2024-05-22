@@ -129,7 +129,9 @@ const AdminPage = () => {
     // Fetch music data when the component mounts
     const fetchMusic = async () => {
       try {
-        const snapshot = await firebase.firestore().collection('Music').where('Status','==','Available').get();
+        const snapshot = await firebase.firestore().collection('Music')
+        // .where('Status','==','Available')
+        .get();
         const musicData = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
         setMusicList(musicData);
       } catch (error) {

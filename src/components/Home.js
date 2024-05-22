@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FormControlLabel, Checkbox, Button, Snackbar,Typography,TextField,Autocomplete } from '@mui/material';
+import { FormControlLabel, Checkbox, Button, Snackbar,Typography,TextField,Autocomplete,Paper  } from '@mui/material';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
+import { CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './NavBar';
+import './Home.css'
 const MusicPicker = () => {
   const [musicData, setMusicData] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -17,7 +19,9 @@ const MusicPicker = () => {
   useEffect(() => {
     // Fetch music data where status is "Available"
     const fetchData = async () => {
-      const musicCollection = await firebase.firestore().collection('Music').where('Status', '==', 'Available').get();
+      const musicCollection = await firebase.firestore().collection('Music')
+      // .where('Status', '==', 'Available')
+      .get();
       const musicList = musicCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setMusicData(musicList);
     };
@@ -68,8 +72,9 @@ const MusicPicker = () => {
 //     // Fetch data again after updating
 //     fetchData();
 //   };
-  
+  const [loading,setLoading] = useState(false);
 const handleAbleButtonClick = async () => {
+  setLoading(true)
     try {
       // Check if all selected items have a status of "Available"
       const unavailableItems = selectedItems.filter(itemId => {
@@ -116,11 +121,13 @@ const handleAbleButtonClick = async () => {
       
     
       setSnackbarMessage('Items successfully picked.');
+      setLoading(false)
       // Add the data to the 'Selected' collection
       selectedItemsData.forEach(data => {
         firebase.firestore().collection('Selected').add(data);
       });
       setSnackbarOpen(true);
+      setLoading(false)
       Navigation('/')
       // Fetch data again after updating
       fetchData();
@@ -128,12 +135,15 @@ const handleAbleButtonClick = async () => {
       console.error('Error picking items:', error);
       setSnackbarMessage('Failed to pick items. Please try again.');
       setSnackbarOpen(true);
+      setLoading(false)
     }
   };
   
   
   const fetchData = async () => {
-    const musicCollection = await firebase.firestore().collection('Music').where('Status', '==', 'Available').get();
+    const musicCollection = await firebase.firestore().collection('Music')
+    // .where('Status', '==', 'Available')
+    .get();
     const musicList = musicCollection.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setMusicData(musicList);
   };
@@ -174,41 +184,152 @@ const handleAbleButtonClick = async () => {
   
   
 
-  return (
-  <div>
-        <Navbar email={pickerEmail} />
-      <div style={{marginTop:"60px"}} > 
-      {musicData.map(item => (
-        <div key={item.id}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectedItems.includes(item.id)}
-                onChange={() => handleCheckboxChange(item.id)}
-              />
-            }
-            label={`${item.name} `}
-          />
-        </div>
-      ))}
-      {musicData.length == 0 && (<center> <h1  style={{color:"red"}}>Sorry No music left , better luck next time.</h1> </center>)}
-      <center>
-        {picked ? (<> <h1 style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000 ,color:'red'}}> You already picked the three musics </h1> </>) :(
-            <>
-                  <Button style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000 }} variant='contained' disabled={selectedItems.length !== 3} onClick={handleAbleButtonClick}>Pick</Button>
+  // return (
+  //   <div>
+  //     <Navbar email={pickerEmail} />
+  //     <div className="container">
+  //       {musicData.length > 0 ? (
+  //         musicData.map((item) => (
+  //           <center key={item.id}>
+  //             <div className="music-item">
+  //               <FormControlLabel
+  //                 label={item.name}
+  //                 control={
+  //                   <Checkbox
+  //                     checked={selectedItems.includes(item.id)}
+  //                     onChange={() => handleCheckboxChange(item.id)}
+  //                     disabled={item.Status !== 'Available'}
+  //                   />
+  //                 }
+  //               />
+  //               {item.Status !== 'Available' && (
+  //                 <span className="unavailable-text">Music Not Available</span>
+  //               )}
+  //             </div>
+  //           </center>
+  //         ))
+  //       ) : (
+  //         <center>
+  //           <h1 className="no-music-message">Sorry, no music left. Better luck next time.</h1>
+  //         </center>
+  //       )}
+  //       <center>
+  //         {picked ? (
+  //           <h1 className="fixed-text">
+  //             You already picked three musics
+  //           </h1>
+  //         ) : (
+  //           <Button
+  //             className="fixed-button"
+  //             variant='contained'
+  //             disabled={selectedItems.length !== 3}
+  //             onClick={handleAbleButtonClick}
+  //           >
+  //             Pick
+  //           </Button>
+  //         )}
+  //       </center>
+  //       <Snackbar
+  //         open={snackbarOpen}
+  //         autoHideDuration={6000}
+  //         onClose={handleCloseSnackbar}
+  //         message={snackbarMessage}
+  //       />
+  //     </div>
+  //   </div>
+  // );
 
-            </>
+  return (
+    <div>
+      <Navbar email={pickerEmail} />
+      <div className="container">
+        {musicData.length > 0 ? (
+          musicData.map((item) => (
+            <center key={item.id}>
+              <div className="music-item">
+                {item.Status === 'Available' ? (
+                  <Paper
+                    elevation={3}
+                    className={`paper ${selectedItems.includes(item.id) ? 'selected' : ''}`}
+                    onClick={() => handleCheckboxChange(item.id)}
+                  >
+                    {item.name}
+                  </Paper>
+                ) : (
+                  <>
+                  {picked ? (
+                  <span style={{}}>
+                    <Paper
+                    elevation={3}
+                    className='paperX'
+                    style={{backgroundColor: item.Picker == pickerEmail ? "#1db954":'transparent',position:"relative"}}
+                  >
+                    <span className=''> 
+                                        {item.name}
+
+                     </span>
+                     <br />
+                    {item.Status !== 'Available' && (
+                  <span style={{}} className="unavailable-text" >Song taken by {item.Picker}</span>
+                )}
+                  </Paper>
+
+                  </span>
+                  ):(                  <Paper
+                    elevation={3}
+                    className={`paper unavailable ${selectedItems.includes(item.id) ? 'selected' : ''}`}
+                  >
+                    {item.name}
+                  </Paper>
+)}
+                  </>
+                )}
+                {/* {item.Status !== 'Available' && (
+                  <span className="unavailable-text">Song taken by {item.Picker}</span>
+                )} */}
+              </div>
+            </center>
+          ))
+        ) : (
+          <center>
+            <h1 className="no-music-message">Sorry, no music left. Better luck next time.</h1>
+          </center>
         )}
-      </center>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        message={snackbarMessage}
-      />
+        <center>
+          {picked ? (
+           <>
+                   <center>
+        <h1 className="fixed-text" >
+          <center>
+          You already picked three musics
+
+          </center>
+            </h1>
+        </center>
+           </>
+          ) : (
+            <Button
+              className="fixed-button"
+              variant='contained'
+              disabled={selectedItems.length !== 3 || loading}
+              onClick={handleAbleButtonClick}
+              style={{position:"fixed",right:1}}
+            >
+              {loading ? (  <CircularProgress size={25} style={{ color: "#fff" }} />):'Pick'}
+            </Button>
+
+          )}
+        </center>
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          message={snackbarMessage}
+        />
+
+      </div>
     </div>
-  </div>
-  );
+  );  
 };
 
 

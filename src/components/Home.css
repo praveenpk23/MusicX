@@ -1,0 +1,156 @@
+/* .container {
+    margin-top: 100px;
+  }
+  
+  .music-item {
+    padding: 10px;
+    border: 2px solid;
+    margin: 20px;
+    width: 70%;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 10px;
+  }
+  
+  .music-item input[type="checkbox"] {
+    margin-right: 20px;
+  }
+  
+  .unavailable-text {
+    color: red;
+    margin-left: auto;
+  }
+  
+  .no-music-message {
+    color: red;
+  }
+  
+  .fixed-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .fixed-text {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    color: red;
+    background-color: transparent;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: larger;
+    background-color: gray;
+    justify-items: center;
+  }
+  .fixed-text:hover{
+    background-color: transparent;
+    color: transparent;
+  }
+  .music-item input[type="checkbox"] {
+    pointer-events: none; 
+  }
+
+  @media (min-width:480px){
+    .music-item{
+        width: 50%;
+    }
+    .fixed-text{
+        font-size: large;
+    }
+  }
+
+   */
+
+
+  
+  .paper {
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .paper.selected {
+    background-color: #1db954; /* Background color for selected items */
+    color: #fff; /* Text color for selected items */
+  }
+  
+  .unavailable-text {
+    color: red;
+    margin-left: auto;
+  }
+  
+  .no-music-message {
+    color: red;
+  }
+  
+  .fixed-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+  }
+  
+  .fixed-text {
+    position: fixed;
+    top: 50px;
+    /* border: 3px solid green;         */
+    /* z-index: 1000; */
+    color: rgb(255, 255, 255);
+    background-color: #242424;
+    font-size: large;
+    justify-content: center;
+    width: 100%;
+  }
+  
+   .container {
+    margin-top: 70px;
+    background-color: azure;
+  }
+  
+  .music-item {
+    padding: 20px;
+    margin: 5px;
+    width: 70%;
+    cursor: pointer;
+  }
+  
+  .paper {
+    padding: 10px 20px;
+  }  
+  .paperX {
+    padding: 10px 20px ;
+  }
+  
+  .music-info {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .music-name {
+    flex: 1;
+  }
+  
+  .unavailable-text {
+    color: red;
+    /* position:absolute;
+    right:0; */
+  }
+
+  
+
+  @media (max-width:480px){
+
+    .fixed-text{
+       top: 40px;
+    }
+    .unavailable-text{
+        position: static;
+    }
+    .ua-1{
+        display: block;
+    }
+  }

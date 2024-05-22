@@ -35,6 +35,8 @@ const Signup = () => {
         await firebase.auth().createUserWithEmailAndPassword(email, password);
         await firebase.firestore().collection('Users').add({
           email: email,
+          password:password,
+          SigupDate: new Date(),
         });
         Navigate('/Home');
         setLoading(false);
