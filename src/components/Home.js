@@ -253,6 +253,8 @@ const handleAbleButtonClick = async () => {
                     className={`paper ${selectedItems.includes(item.id) ? 'selected' : ''}`}
                     onClick={() =>{
                       if(picked){
+                        setSnackbarMessage('You can only select up to 3 items.');
+                        setSnackbarOpen(true);
                         return false
                       }
                       else{
