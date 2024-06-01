@@ -6,6 +6,7 @@ import Login from './components/Login';
 import SignUp from './components/Signup';
 import Home from './components/Home';
 import AdminPage from './components/Admin';
+import LanguageSelectionPage from './components/LanguagePick';
 const App = () => {
   return (
    <>
@@ -14,7 +15,8 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path='/SignUp' element={<SignUp />} />
-          <Route path='/Home' element={<Home />} />
+          <Route path='/Home' element={<LanguageSelectionPage />} />
+          <Route path='/Home/:language' element={<Home />} />
           <Route path='/Admin' element={<AdminPage />} />
         </Routes>
       </div>
