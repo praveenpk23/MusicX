@@ -7,6 +7,8 @@ import SignUp from './components/Signup';
 import Home from './components/Home';
 import AdminPage from './components/Admin';
 import LanguageSelectionPage from './components/LanguagePick';
+import ForgotPassword from './components/ForgotPassword'
+import ForgotPassT from './components/ForgotPass.Token'
 const App = () => {
   return (
    <>
@@ -15,6 +17,8 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path='/SignUp' element={<SignUp />} />
+          <Route path='/ForgotPassword' element={<ForgotPassword />} />
+          <Route path='/ForgotPassword/:token' element={<ForgotPassT />} />
           <Route path='/Home' element={<LanguageSelectionPage />} />
           <Route path='/Home/:language' element={<Home />} />
           <Route path='/Admin' element={<AdminPage />} />

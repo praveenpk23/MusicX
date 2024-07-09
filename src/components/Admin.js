@@ -210,7 +210,7 @@ import { TextField, Button, Typography, Paper, List, ListItem, ListItemText, Cir
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import Navbar from './NavBar';
-
+import { useNavigate } from 'react-router-dom';
 const AdminPage = () => {
   const [musicName, setMusicName] = useState('');
   const [artist, setArtist] = useState('');
@@ -219,7 +219,9 @@ const AdminPage = () => {
   const [language, setLanguage] = useState('');
   const [musicList, setMusicList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const [editingId, setEditingId] = useState(null);
+  const [UserX,setUserX] = useState('');
   const [editingMusic, setEditingMusic] = useState({
     name: '',
     artist: '',
@@ -348,13 +350,25 @@ const AdminPage = () => {
       language: ''
     });
   };
-
+  useEffect(() => {
+    const unsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
+      if (user && user.email) {
+        await setUserX(user.email);
+        // Fetch pick count once pickerEmail is set
+        // await fetchPickCount();
+      } else {
+        navigate('/');
+      }
+    });
+    return () => unsubscribe();
+}, []);
+  
   return (
     <div>
       <Navbar />
       <Paper style={{ padding: 20, maxWidth: 600, margin: '20px auto', marginTop: "100px" }}>
         <Typography variant="h5" gutterBottom>
-          Add Music
+          Add Music 
         </Typography>
         <TextField
           label="Music Name"
@@ -385,6 +399,8 @@ const AdminPage = () => {
           >
             <MenuItem value="Album">Album</MenuItem>
             <MenuItem value="Movie">Movie</MenuItem>
+            <MenuItem value="Modevotionalvie">devotional</MenuItem>
+             
           </Select>
         </FormControl>
         <FormControl fullWidth margin="normal">
@@ -417,7 +433,7 @@ const AdminPage = () => {
           {musicList.map((music) => (
             <ListItem key={music.id} divider>
               {editingId === music.id ? (
-                <>
+                <div>
                   <TextField
                     label="Music Name"
                     fullWidth
@@ -463,13 +479,15 @@ const AdminPage = () => {
                       <MenuItem value="Hindi">Hindi</MenuItem>
                     </Select>
                   </FormControl>
+                  <center>
                   <Button onClick={() => handleSaveEdit(music.id)} color="primary" variant="contained" style={{ marginTop: 10 }}>
                     Save
                   </Button>
                   <Button onClick={handleCancelEdit} color="secondary" variant="contained" style={{ marginTop: 10, marginLeft: 10 }}>
                     Cancel
                   </Button>
-                </>
+                  </center>
+                </div>
               ) : (
                 <>
                   <ListItemText
@@ -509,6 +527,128 @@ const AdminPage = () => {
       </Dialog>
     </div>
   );
+  // return (
+  //   <div>
+  //     <Navbar />
+  //     <Paper style={{ padding: 20, maxWidth: 900, margin: '20px auto', marginTop: "100px" }}>
+  //       <Typography variant="h5" gutterBottom>
+  //         Add Music 
+  //       </Typography>
+  //       <TextField
+  //         label="Music Name"
+  //         fullWidth
+  //         value={musicName}
+  //         onChange={(e) => setMusicName(e.target.value)}
+  //         margin="normal"
+  //       />
+  //       <TextField
+  //         label="Artist"
+  //         fullWidth
+  //         value={artist}
+  //         onChange={(e) => setArtist(e.target.value)}
+  //         margin="normal"
+  //       />
+  //       <TextField  
+  //         label="Music Director"
+  //         fullWidth
+  //         value={musicDirector}
+  //         onChange={(e) => setMusicDirector(e.target.value)}
+  //         margin="normal"
+  //       />
+  //     </Paper>
+  //     {/* Music List */}
+  //     <Paper style={{ padding: 20, maxWidth: 800, margin: '20px auto' }}>
+  //       <Typography variant="h5" gutterBottom>
+  //         Music List
+  //       </Typography>
+  //       <List>
+  //         {musicList.map((music) => (
+  //           <ListItem key={music.id} divider>
+  //             {editingId === music.id ? (
+  //               // Edit Music Form for the selected music item
+  //              <>
+  //               <div>
+  //                 <TextField
+  //                   label="Music Name"
+  //                   fullWidth
+  //                   value={editingMusic.name}
+  //                   onChange={(e) => setEditingMusic({ ...editingMusic, name: e.target.value })}
+  //                   margin="normal"
+  //                 />
+  //                 <TextField
+  //                   label="Artist"
+  //                   fullWidth
+  //                   value={editingMusic.artist}
+  //                   onChange={(e) => setEditingMusic({ ...editingMusic, artist: e.target.value })}
+  //                   margin="normal"
+  //                 />
+  //                 <TextField
+  //                   label="Music Director"
+  //                   fullWidth
+  //                   value={editingMusic.musicDirector}
+  //                   onChange={(e) => setEditingMusic({ ...editingMusic, musicDirector: e.target.value })}
+  //                   margin="normal"
+  //                 />
+  //                 <FormControl fullWidth margin="normal">
+  //                   <InputLabel>Category</InputLabel>
+  //                   <Select
+  //                     value={editingMusic.category}
+  //                     onChange={(e) => setEditingMusic({ ...editingMusic, category: e.target.value })}
+  //                     variant='outlined'
+
+  //                   >
+  //                     <MenuItem value="Album">Album</MenuItem>
+  //                     <MenuItem value="Movie">Movie</MenuItem>
+  //                   </Select>
+  //                 </FormControl>
+  //                 <FormControl fullWidth margin="normal">
+  //                   <InputLabel>Language</InputLabel>
+  //                   <Select
+  //                     value={editingMusic.language}
+  //                     onChange={(e) => setEditingMusic({ ...editingMusic, language: e.target.value })}
+  //                     variant='outlined'
+  //                   >
+  //                     <MenuItem value="Tamil">Tamil</MenuItem>
+  //                     <MenuItem value="English">English</MenuItem>
+  //                     <MenuItem value="Malayalam">Malayalam</MenuItem>
+  //                     <MenuItem value="Hindi">Hindi</MenuItem>
+  //                   </Select>
+  //                <center>
+  //                <Button onClick={() => handleSaveEdit(music.id)} color="primary" variant="contained" style={{ marginTop: 10, display: "inline-block" }}>
+  //                 Save
+  //               </Button>
+  //               <Button onClick={handleCancelEdit} color="secondary" variant="contained" style={{ marginTop: 10, marginLeft: 10, display: "inline-block" }}>
+  //                 Cancel
+  //               </Button>
+  //                </center>
+  //                 </FormControl>
+  //               </div>
+             
+  //              </>
+  //             ) : (
+  //               // Display Music Details for non-edited items
+  //               <>
+  //                 <ListItemText
+  //                   primary={`${music.name} (${music.category} - ${music.language})`}
+  //                   secondary={`Artist: ${music.artist}, Music Director: ${music.musicDirector}`}
+  //                 />
+  //                 <Button onClick={() => handleEditMusic(music)} color="primary" variant="outlined" style={{ marginLeft: 10 }}>
+  //                   Edit
+  //                 </Button>
+  //                 <Button onClick={() => confirmDeleteMusic(music.id)} color="secondary" variant="outlined" style={{ marginLeft: 10 }}>
+  //                   Delete
+  //                 </Button>
+  //               </>
+  //             )}
+  //           </ListItem>
+  //         ))}
+  //       </List>
+  //     </Paper>
+  //     {/* Delete Confirmation Dialog */}
+  //     {/* Your existing delete confirmation dialog */}
+  //   </div>
+  // );
+  
 };
 
 export default AdminPage;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, } from 'react';
-import { FormControlLabel, Checkbox, Button, Snackbar,Typography,TextField,Autocomplete,Paper, selectClasses  } from '@mui/material';
+import { FormControlLabel, Checkbox, Button, Snackbar,Typography,TextField,Autocomplete,Paper, selectClasses ,TableCell,TableRow,TableContainer,TableHead,Table,TableBody} from '@mui/material';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import { CircularProgress } from '@mui/material';
@@ -209,10 +209,17 @@ const fetchData = async () => {
       const batch = firebase.firestore().batch();
   
       // Update status of selected items to "Picked" and set picker's email and dates
+      // const today = new Date();
+      // const oneWeekLater = new Date(today);
+      // oneWeekLater.setDate(oneWeekLater.getDate() + 7);
       const today = new Date();
+
       const oneWeekLater = new Date(today);
       oneWeekLater.setDate(oneWeekLater.getDate() + 7);
-  
+      
+      console.log(today);
+      console.log(oneWeekLater);
+
       selectedItems.forEach(itemId => {
         const musicRef = firebase.firestore().collection('Music').doc(itemId);
         batch.update(musicRef, { 
@@ -241,50 +248,103 @@ const fetchData = async () => {
     }
   };
   
+  // useEffect(() => {
+  //   const checkExpiredItems = async () => {
+  //     try {
+  //       const today = new Date();
+        
+  //       // Query items where EndDate is present or past
+  //       const expiredItemsSnapshot = await firebase.firestore().collection('Music')
+  //         .where('EndDate', '<=', today)
+  //         .get();
+        
+  //       const batch = firebase.firestore().batch();
+  
+  //       expiredItemsSnapshot.forEach(doc => {
+  //         const expiredData = doc.data();
+  //         // Add expired data to 'Expired' collection
+  //         firebase.firestore().collection('Expired').doc(doc.id).set({
+  //           SongName: expiredData.SongName,
+  //           Picker: expiredData.Picker,
+  //           StartDate: expiredData.StartDate,
+  //           EndDate: expiredData.EndDate
+  //         });
+  
+  //         // Update status to 'Available' and remove picker, startDate, endDate
+  //         batch.update(doc.ref, {
+  //           Status: 'Available',
+  //           Picker: firebase.firestore.FieldValue.delete(),
+  //           StartDate: firebase.firestore.FieldValue.delete(),
+  //           EndDate: firebase.firestore.FieldValue.delete()
+  //         });
+  //       });
+  
+  //       // Commit the batch update
+  //       await batch.commit();
+  //     } catch (error) {
+  //       console.error('Error checking expired items:', error);
+  //     }
+  //   };
+  
+  //   checkExpiredItems();
+  // }, []);
+ 
+ 
+ 
   useEffect(() => {
     const checkExpiredItems = async () => {
-      try {
-        const today = new Date();
+        try {
+            const today = firebase.firestore.Timestamp.now(); // Convert to Firestore Timestamp
         
-        // Set time to 00:00:00 for accurate comparison
-        today.setHours(0, 0, 0, 0);
-  
-        // Query items where EndDate is present or past
-        const expiredItemsSnapshot = await firebase.firestore().collection('Music')
-          .where('EndDate', '<=', today)
-          .get();
-        
-        const batch = firebase.firestore().batch();
-  
-        expiredItemsSnapshot.forEach(doc => {
-          const expiredData = doc.data();
-          // Add expired data to 'Expired' collection
-          firebase.firestore().collection('Expired').doc(doc.id).set({
-            SongName: expiredData.SongName,
-            Picker: expiredData.Picker,
-            StartDate: expiredData.StartDate,
-            EndDate: expiredData.EndDate
-          });
-  
-          // Update status to 'Available' and remove picker, startDate, endDate
-          batch.update(doc.ref, {
-            Status: 'Available',
-            Picker: firebase.firestore.FieldValue.delete(),
-            StartDate: firebase.firestore.FieldValue.delete(),
-            EndDate: firebase.firestore.FieldValue.delete()
-          });
-        });
-  
-        // Commit the batch update
-        await batch.commit();
-      } catch (error) {
-        console.error('Error checking expired items:', error);
-      }
+            // Query all items in 'Music' collection
+            const musicSnapshot = await firebase.firestore().collection('Music').get();
+            
+            const batch = firebase.firestore().batch();
+    
+            musicSnapshot.forEach(doc => {
+                const musicData = doc.data();
+                // Check if EndDate is in the past or present
+                if (musicData.EndDate <= today) {
+                    const expiredDocRef = firebase.firestore().collection('Expired').doc(doc.id);
+                    
+                    // Add expired data to 'Expired' collection
+                    batch.set(expiredDocRef, {
+                        SongName: musicData.name,
+                        Picker: musicData.Picker,
+                        StartDate: musicData.StartDate,
+                        EndDate: musicData.EndDate
+                    });
+            
+                    // Update status to 'Available' and remove Picker, StartDate, EndDate in original 'Music' collection
+                    batch.update(doc.ref, {
+                        Status: 'Available',
+                        Picker: firebase.firestore.FieldValue.delete(),
+                        StartDate: firebase.firestore.FieldValue.delete(),
+                        EndDate: firebase.firestore.FieldValue.delete()
+                    });
+                }
+            });
+    
+            // Commit the batch update
+            await batch.commit();
+            console.log('Expired items processed successfully.');
+            // fetchData()
+        } catch (error) {
+            console.error('Error checking expired items:', error);
+            // Log additional details for debugging
+            console.error('Error Details:', {
+                message: error.message,
+                stack: error.stack,
+                code: error.code
+            });
+        }
     };
-  
+    
     checkExpiredItems();
-  }, []);
-  
+}, []); // Dependency array to run once
+
+ 
+ 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged(async (user) => {
       if (user && user.email) {
@@ -322,108 +382,328 @@ const fetchData = async () => {
   }, [pickerEmail]);
   
 console.log(musicData)
+// Filter
+const [searchName, setSearchName] = useState('');
+  const [searchArtist, setSearchArtist] = useState('');
+  const [searchCategory, setSearchCategory] = useState('');
+  const [searchDirector, setSearchDirector] = useState('');
+  const [searchStatus, setSearchStatus] = useState('');
+
+  // Filter music data based on search inputs
+  const filteredMusicData = musicData.filter(item => 
+    item.name.toLowerCase().includes(searchName.toLowerCase()) &&
+    item.artist.toLowerCase().includes(searchArtist.toLowerCase()) &&
+    item.category.toLowerCase().includes(searchCategory.toLowerCase()) &&
+    item.musicDirector.toLowerCase().includes(searchDirector.toLowerCase()) &&
+    item.Status.toLowerCase().includes(searchStatus.toLowerCase())
+  );
+
+// return (
+//   <div>
+//   <Navbar email={pickerEmail} />
+//   <div className="container">
+//     <TableContainer component={Paper}>
+//       <Table className="music-table">
+//         <TableHead>
+//           <TableRow>
+//             <TableCell>
+//               <TextField 
+//                 label="Name" 
+//                 value={searchName} 
+//                 onChange={(e) => setSearchName(e.target.value)} 
+//                 variant="outlined" 
+//                 size="small" 
+//               />
+//             </TableCell>
+//             <TableCell>
+//               <TextField 
+//                 label="Artist" 
+//                 value={searchArtist} 
+//                 onChange={(e) => setSearchArtist(e.target.value)} 
+//                 variant="outlined" 
+//                 size="small" 
+//               />
+//             </TableCell>
+//             <TableCell>
+//               <TextField 
+//                 label="Category" 
+//                 value={searchCategory} 
+//                 onChange={(e) => setSearchCategory(e.target.value)} 
+//                 variant="outlined" 
+//                 size="small" 
+//               />
+//             </TableCell>
+//             <TableCell>
+//               <TextField 
+//                 label="Director" 
+//                 value={searchDirector} 
+//                 onChange={(e) => setSearchDirector(e.target.value)} 
+//                 variant="outlined" 
+//                 size="small" 
+//               />
+//             </TableCell>
+//             <TableCell>
+//               <TextField 
+//                 label="Status" 
+//                 value={searchStatus} 
+//                 onChange={(e) => setSearchStatus(e.target.value)} 
+//                 variant="outlined" 
+//                 size="small" 
+//               />
+//             </TableCell>
+//           </TableRow>
+//           <TableRow>
+//             <TableCell>Name</TableCell>
+//             <TableCell>Artist</TableCell>
+//             <TableCell>Category</TableCell>
+//             <TableCell>Director</TableCell>
+//             <TableCell>Status</TableCell>
+//           </TableRow>
+//         </TableHead>
+//         <TableBody>
+//           {filteredMusicData.length > 0 ? (
+//             filteredMusicData.map((item) => (
+//               <TableRow
+//                 key={item.id}
+//                 className={`${selectedItems.includes(item.id) ? 'selected' : ''} ${item.Picker === pickerEmail ? 'user-picked' : ''}`}
+//                 onClick={() => item.Status === 'Available' ? handleCheckboxChange(item.id) : null}
+//                 style={{ cursor: item.Status === 'Available' ? 'pointer' : 'not-allowed' }}
+//               >
+//                 <TableCell>{item.name}</TableCell>
+//                 <TableCell>{item.artist}</TableCell>
+//                 <TableCell>{item.category}</TableCell>
+//                 <TableCell>{item.musicDirector}</TableCell>
+//                 <TableCell>
+//                   {item.Status === 'Available' ? (
+//                     <Paper elevation={3} className="paper">
+//                       Available
+//                     </Paper>
+//                   ) : (
+//                     <Paper elevation={3} className={`paper unavailable ${item.Picker === pickerEmail ? 'user-picked' : ''}`}>
+//                       {item.Picker === pickerEmail ? (
+//                         <>
+//                           <div>You picked {item.Picker}</div>
+//                           <div>Start Date: {new Date(item.StartDate.toDate()).toLocaleString()}</div>
+//                           <div>End Date: {new Date(item.EndDate.toDate()).toLocaleString()}</div>
+//                         </>
+//                       ) : (
+//                         <div className='paper unavailable user-picked'>
+//                           <div>Song taken by {item.Picker}</div>
+//                           <div>Start Date: {new Date(item.StartDate.toDate()).toLocaleString()}</div>
+//                           <div>End Date: {new Date(item.EndDate.toDate()).toLocaleString()}</div>
+//                         </div>
+//                       )}
+//                     </Paper>
+//                   )}
+//                 </TableCell>
+//               </TableRow>
+//             ))
+//           ) : (
+//             <TableRow>
+//               <TableCell colSpan={5} align="center">
+//                 <h1 className="no-music-message">Sorry, no music left. Better luck next time.</h1>
+//               </TableCell>
+//             </TableRow>
+//           )}
+//         </TableBody>
+//       </Table>
+//     </TableContainer>
+//     <center>
+//       {Selectcount === 0 ? (
+//         <h1 className="fixed-text">You already picked three songs</h1>
+//       ) : (
+//         <Button 
+//           className="fixed-button" 
+//           variant='contained'
+//           style={{ position: "fixed", right: 2 }}
+//           onClick={handleAbleButtonClick}
+//         >
+//           {loading ? <CircularProgress size={25} style={{ color: "#fff" }} /> : 'Pick'}
+//         </Button>
+//       )}
+//     </center>
+//     <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar} message={snackbarMessage} />
+//   </div>
+// </div>
+// );
+
 return (
-  // <div>
-  //   <Navbar email={pickerEmail} />
+  <div>
+    <Navbar email={pickerEmail} />
+    <div className="container">
+      <center>
+      <h1 style={{marginTop:"0px"}}>{language}</h1>
+      </center>
+      <TableContainer component={Paper} style={{ overflowX: 'auto' }}>
+        
+        <Table className="music-table">
+          <TableHead>
+            <TableRow >
+              <TableCell style={{backgroundColor:"white"}} >
+                <TextField 
+                  label="Name (Search)" 
+                  value={searchName} 
+                  onChange={(e) => setSearchName(e.target.value)} 
+                  variant="outlined" 
+                  size="small" 
+                  fullWidth
+                />
+              </TableCell >
+              <TableCell style={{backgroundColor:"white"}}>
+                <TextField 
+                  label="Artist (Search)" 
+                  value={searchArtist} 
+                  onChange={(e) => setSearchArtist(e.target.value)} 
+                  variant="outlined" 
+                  size="small" 
+                  fullWidth
+                />
+              </TableCell>
+              <TableCell style={{backgroundColor:"white"}}>
+                <TextField 
+                  label="Category (Search)" 
+                  value={searchCategory} 
+                  onChange={(e) => setSearchCategory(e.target.value)} 
+                  variant="outlined" 
+                  size="small" 
+                  fullWidth
+                />
+              </TableCell>
+              <TableCell style={{backgroundColor:"white"}}>
+                <TextField 
+                  label="Director (Search)" 
+                  value={searchDirector} 
+                  onChange={(e) => setSearchDirector(e.target.value)} 
+                  variant="outlined" 
+                  size="small" 
+                  fullWidth
+                />
+              </TableCell>
+              <TableCell style={{backgroundColor:"white"}}>
+                <TextField 
+                  label="Status (Search)" 
+                  value={searchStatus} 
+                  onChange={(e) => setSearchStatus(e.target.value)} 
+                  variant="outlined" 
+                  size="small" 
+                  fullWidth
+                />
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Artist</TableCell>
+              <TableCell>Category</TableCell>
+              <TableCell>Director</TableCell>
+              <TableCell>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredMusicData.length > 0 ? (
+              filteredMusicData.map((item) => (
+                <TableRow
+                  key={item.id}
+                  className={`${selectedItems.includes(item.id) ? 'selected' : ''} ${item.Picker === pickerEmail ? 'user-picked' : ''}`}
+                  onClick={() => item.Status === 'Available' ? handleCheckboxChange(item.id) : null}
+                  style={{ cursor: item.Status === 'Available' ? 'pointer' : 'not-allowed' }}
+                >
+                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.artist}</TableCell>
+                  <TableCell>{item.category}</TableCell>
+                  <TableCell>{item.musicDirector}</TableCell>
+                  <TableCell>
+                    {item.Status === 'Available' ? (
+                      <Paper elevation={3} className="paper">
+                        Available
+                      </Paper>
+                    ) : (
+                      <Paper elevation={3} className={`paper unavailable ${item.Picker === pickerEmail ? 'user-picked' : ''}`}>
+                        {item.Picker === pickerEmail ? (
+                          <>
+                            <div>You picked {item.Picker}</div>
+                            <div>Start Date: {new Date(item.StartDate.toDate()).toLocaleString()}</div>
+                            <div>End Date: {new Date(item.EndDate.toDate()).toLocaleString()}</div>
+                          </>
+                        ) : (
+                          <div className='paper unavailable user-picked'>
+                            <div>Song taken by {item.Picker}</div>
+                            <div>Start Date: {new Date(item.StartDate.toDate()).toLocaleString()}</div>
+                            <div>End Date: {new Date(item.EndDate.toDate()).toLocaleString()}</div>
+                          </div>
+                        )}
+                      </Paper>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  <h1 className="no-music-message">Sorry, no music left. Better luck next time.</h1>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <center>
+        {Selectcount === 0 ? (
+          <h1 className="fixed-text">You already picked three songs</h1>
+        ) : (
+          <Button 
+            className="fixed-button" 
+            variant='contained'
+            style={{ position: "fixed", right: 2 ,marginRight:"2px"}}
+            disabled={selectedItems==0}
+            onClick={handleAbleButtonClick}
+          >
+            {loading ? <CircularProgress size={25} style={{ color: "#fff" }} /> : 'Pick'}
+          </Button>
+        )}
+      </center>
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar} message={snackbarMessage} />
+    </div>
+  </div>
+);
 
-  //   <div className="container">
-  //     {musicData.length > 0 ? (
-  //       musicData.map((item) => (
-  //         <center key={item.id}>
-  //           <div className="music-item">
-  //             {item.Status === 'Available' ? (
-  //               <Paper
-  //                 elevation={3}
-  //                 className={`paper ${selectedItems.includes(item.id) ? 'selected' : ''}`}
-  //                 onClick={() => handleCheckboxChange(item.id)}
-  //               >
-  //                 <div className="music-info">
-  //                   <div className="music-name">
-  //                     <b>{item.name}</b>
-  //                   </div>
-  //                   <div>
-  //                     Artist: {item.artist}<br />
-  //                     Category: {item.category}<br />
-  //                     Director: {item.musicDirector}
-  //                   </div>
-  //                 </div>
-  //               </Paper>
-  //             ) : (
-  //               <>
-  //                 {item.Picker === pickerEmail ? (
-  //                   <Paper
-  //                     elevation={3}
-  //                     className={`paper unavailable ${selectedItems.includes(item.id) ? 'selected' : ''}`}
-  //                     style={{ backgroundColor: "#1db954" }}
-  //                   >
-  //                     <div className="music-info">
-  //                       <div className="music-name">
-  //                         <b>{item.name}</b>
-  //                       </div>
-  //                       <div>
-  //                         Artist: {item.artist}<br />
-  //                         Category: {item.category}<br />
-  //                         Director: {item.musicDirector}<br />
-  //                         Start Date: {new Date(item.StartDate).toLocaleString()}<br />
-  //                         End Date: {new Date(item.EndDate).toLocaleString()}
-  //                       </div>
-  //                     </div>
-  //                     <p style={{ color: "red" }}>You picked {item.Picker}</p>
-  //                   </Paper>
-  //                 ) : (
-  //                   <Paper
-  //                     elevation={3}
-  //                     className={`paper unavailable ${selectedItems.includes(item.id) ? 'selected' : ''}`}
-  //                   >
-  //                     <div className="music-info">
-  //                       <div className="music-name">
-  //                         <b>{item.name}</b>
-  //                       </div>
-  //                       <div>
-  //                         Artist: {item.artist}<br />
-  //                         Category: {item.category}<br />
-  //                         Director: {item.musicDirector}
-  //                       </div>
-  //                     </div>
-  //                     <p style={{ color: "red" }}>Song taken by {item.Picker}</p>
-  //                   </Paper>
-  //                 )}
-  //               </>
-  //             )}
-  //           </div>
-  //         </center>
-  //       ))
-  //     ) : (
-  //       <center>
-  //         <h1 className="no-music-message">Sorry, no music left. Better luck next time.</h1>
-  //       </center>
-  //     )}
-  //     <center>
-  //       {Selectcount === 0 ? (
-  //         <h1 className="fixed-text">
-  //           You already picked three songs
-  //         </h1>
-  //       ) : (
-  //         <Button
-  //           className="fixed-button"
-  //           variant='contained'
-  //           onClick={handleAbleButtonClick}
-  //           style={{ position: "fixed", right: 1 }}
-  //         >
-  //           {loading ? <CircularProgress size={25} style={{ color: "#fff" }} /> : 'Pick'}
-  //         </Button>
-  //       )}
-  //     </center>
-  //     <Snackbar
-  //       open={snackbarOpen}
-  //       autoHideDuration={6000}
-  //       onClose={handleCloseSnackbar}
-  //       message={snackbarMessage}
-  //     />
-  //   </div>
-  // </div>
+};
 
-<div>
+
+
+export default MusicPicker;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* <div>
   <Navbar email={pickerEmail} />
   <div className="container">
     {musicData.length > 0 ? (
@@ -464,12 +744,12 @@ return (
                      
                       </>
                     ) : (
-                     <>
+                     <div className='paper unavailable user-picked'>
                       <div>Song taken by {item.Picker}</div>
                       <div>Start Date: {new Date(item.StartDate.toDate()).toLocaleString()}</div>
                         <div>End Date: {new Date(item.EndDate.toDate()).toLocaleString()}</div>
                      
-                     </>
+                     </div>
                     )}
                   </Paper>
                 )}
@@ -496,10 +776,4 @@ return (
     </center>
     <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar} message={snackbarMessage} />
   </div>
-</div>
-);
-};
-
-
-
-export default MusicPicker;
+</div> */}

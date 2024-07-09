@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import { TextField, Button, Paper, Typography,FormControlLabel ,Checkbox} from '@mui/material';
+import { TextField, Button, Paper, Typography,FormControlLabel ,Checkbox,Box} from '@mui/material';
 import  'firebase/auth'
 import {CircularProgress} from '@mui/material';
 import {Link, useNavigate} from 'react-router-dom'
@@ -52,56 +52,67 @@ const Login = () => {
     return () => unsubscribe();
   }, []);
   return (
-  <div style={{marginTop:"150px"}}>
-      <>
-      <Toaster />
-      <Paper elevation={3} style={{ padding: 20, maxWidth: 400, margin: 'auto', marginTop: 50 }}>
-        <Typography variant="h5" component="div" align="center" gutterBottom>
-          MusiceX
-        </Typography>
-        <TextField
-          label="Email"
-          type="email"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="Password"
-          type={showPassword ? 'text' : 'password'}
-          fullWidth
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        {error && <Typography color="error">{error}</Typography>}
-        <FormControlLabel
-          control={<Checkbox checked={showPassword} onChange={() => setShowPassword(!showPassword)} />}
-          label="Show Password"
-        />
-        <Button
-          disabled={loading}
-          variant="contained"
-          style={{ width: "100%", marginTop: 20 }}
-          color="primary"
-          onClick={handleLogin}
-        >
-          {loading ? (
-            <CircularProgress size={25} style={{ color: "#fff" }} />
-          ) : (
-            "Login"
-          )}
-        </Button>
-        <hr />
-        <Typography variant="body2" align="center">
-        New user ?
-          <Link to='/SignUp'> SignUp</Link>
-        </Typography>
-      </Paper>
-    </>
-  </div>
-  );
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: '#f0f2f5' }}>
+        <>
+            <Toaster />
+            <Paper elevation={3} sx={{ padding: 4, maxWidth: 400, width: '100%', margin: '0 20px', bgcolor: 'background.paper' }}>
+                <Typography variant="h4" component="div" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
+                    MusiceX
+                </Typography>
+                <TextField
+                    label="Email"
+                    type="email"
+                    fullWidth
+                    margin="normal"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    sx={{ mt: 2 }}
+                    required
+                />
+                <TextField
+                    label="Password"
+                    type={showPassword ? 'text' : 'password'}
+                    fullWidth
+                    margin="normal"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    sx={{ mt: 2 }}
+                    required
+                />
+                {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
+                <FormControlLabel
+                    control={<Checkbox checked={showPassword} onChange={() => setShowPassword(!showPassword)} />}
+                    label="Show Password"
+                    sx={{ mt: 2 }}
+                />
+                <Button
+                    disabled={loading}
+                    variant="contained"
+                    fullWidth
+                    sx={{ mt: 3, py: 1.5, backgroundColor: 'primary.main', '&:hover': { backgroundColor: 'primary.dark' } }}
+                    onClick={handleLogin}
+                >
+                    {loading ? (
+                        <CircularProgress size={25} sx={{ color: "#fff" }} />
+                    ) : (
+                        "Login"
+                    )}
+                </Button>
+                <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+                    <Typography variant="body2">
+                        New user?
+                        <Link to='/SignUp' style={{ textDecoration: 'none', color: '#3f51b5', marginLeft: 4 }}>Sign Up</Link>
+                    </Typography>
+                </Box>
+                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                    <Typography variant="body2">
+                        <Link to='/ForgotPassword' style={{ textDecoration: 'none', color: '#3f51b5' }}>Forgot Password?</Link>
+                    </Typography>
+                </Box>
+            </Paper>
+        </>
+    </Box>
+);
 
 };
 
